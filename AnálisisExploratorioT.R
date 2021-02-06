@@ -1,6 +1,7 @@
 # Librerías ####
 library(ggplot2)
 library(dplyr)
+library(corrplot)
 
 # Selección de las variables de interés ####
 variables.vector <- c("danceability",
@@ -119,33 +120,70 @@ ggplot(mundial, aes(x = loudness, y = track.popularity)) +
 # Comprobación de ideas básicas ####
     
 # Volumen contra energía
-ggplot(mundial, aes(x = loudness, y = energy)) + 
+ggplot(mundial, aes(x = loudness, y = energy,col = mode_name)) + 
     geom_point() + 
     labs(x = 'Energía', y = 'Volumen')
     
 # Danzabilidad contra energía
-ggplot(mundial, aes(x = energy, y = danceability)) + 
+ggplot(mundial,
+       aes(x = energy,
+           y = danceability,
+           col = mode_name)) + 
     geom_point() + 
     labs(x = 'Energía', y = 'Danzabilidad')
     
 # Habla contra instrumental
-ggplot(mundial, aes(x = speechiness, y = instrumentalness)) + 
+ggplot(mundial,
+       aes(x = speechiness, 
+           y = instrumentalness,
+           col = mode_name)) + 
     geom_point() + 
     labs(x = 'Habla', y = 'Instrumental')
 
 # Popularidad mexicana con respecto a otras variables ####
 
 # Danzabilidad
-ggplot(mexico, aes(x = danceability, y = track.popularity)) + 
-    geom_point() + 
+ggplot(mexico, 
+       aes(x = danceability, 
+           y = track.popularity,
+           col = mode_name)) + 
+    geom_point() +  
     labs(x = 'Danzabilidad', y = 'Popularidad')
 
 # Energía
-ggplot(mexico, aes(x = energy, y = track.popularity)) + 
+ggplot(mexico,
+       aes(x = energy, 
+           y = track.popularity,
+           col = mode_name)) + 
     geom_point() + 
     labs(x = 'Energía', y = 'Popularidad')
 
 # Volumen
-ggplot(mexico, aes(x = loudness, y = track.popularity)) + 
+ggplot(mexico, 
+       aes(x = loudness,
+           y = track.popularity,
+           col = mode_name)) + 
     geom_point() + 
     labs(x = 'Volumen', y = 'Popularidad')
+
+# Correlograma ####
+# Selección de columnas numéricas
+numericas.columnas <- c("danceability",
+                        "energy",
+                        "loudness",
+                        "speechiness",
+                        "instrumentalness",
+                        "valence",
+                        "tempo",
+                        "track.duration_ms",
+                        "track.popularity")
+
+mexico.numericas <- mexico %>% select(numericas.columnas)
+mundial.numericas <- mundial %>% select(numericas.columnas)
+
+# Correlaciones ####
+mexico.cor <- cor(mexico.numericas)
+corrplot(mexico.cor)
+
+mundial.cor <- cor(mundial.numericas)
+corrplot(mundial.cor)
