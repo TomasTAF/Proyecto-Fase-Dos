@@ -193,4 +193,4 @@ ggplot(dataMundoSubset, aes(x= speechiness, track.popularity)) +
 # ggridges con años y danzabilidad
 # boxplots
 # algo chido con ggplot
-
+# comentario 
