@@ -17,12 +17,12 @@ variables.vector <- c("danceability",
                       "track.popularity",
                       "track.name",
                       "key_name",
+                      "track.album.release_date",
                       "mode_name",
                       "key_mode")
 
-mundial <- dataM %>% select(variables.vector)
-mexico <- data %>% select(variables.vector)
-
+mundial <- read.csv('México.csv')
+mexico <- read.csv('Mundo.csv')
 
 # Nombre de las variables
 names(mexico)
@@ -214,3 +214,4 @@ ggplot(mexico) +
     geom_histogram(stat='count') 
 
 # Nótese que efectivamente hay más canciones en mayor
+
