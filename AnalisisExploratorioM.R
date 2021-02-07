@@ -3,6 +3,7 @@
 library(devtools)
 #Ahora instalamos spotifyr
 devtools::install_github('charlie86/spotifyr')
+
 #Cargamos otras paqueterías necesarias
 library(spotifyr)
 library(tidyverse)
@@ -28,25 +29,12 @@ beatles %>%
   count(key_mode, sort = TRUE) %>%
   head(20) %>% kable()
 
-#Ahora obtenemos la "valencia" de las canciones de la banda Joy Division, una medida de 
-#positividad creada por Spotify
-joy <- get_artist_audio_features('joy division')
-joy %>% 
-  arrange(-valence) %>% 
-  select(track_name, valence) %>% 
-  head(5) %>% 
-  kable()
-View(joy)
-#Graficamos la valencia de cada pista utilizando el paquete ggridges para instalar ggjoy
-
-ggplot(joy, aes(x = valence, y = album_name)) + 
-  geom_density_ridges() + 
-  theme_ridges() 
 
 #Obtenemos el análisis de audio de un track en específico
 Tusa <- get_track_audio_analysis('7k4t7uLgtOxPwTpFmtJNTY')
 View(Tusa)
 
+##Data Cleaning y Set up
 
 #Obtener las caracterìsticas de las canciones top de 2020 - 2000 en el mundo 
 Top2020<- get_playlist_audio_features(playlist_uris ='37i9dQZF1DX7Jl5KP2eZaS')
@@ -79,17 +67,17 @@ names(dataMundo)
 #Vemos que hay muchas columnas innecesarias para el análisis, por lo tanto reducimos nuestro
 # dataset, seleccionando aquellas que parecen ser importantes.
 
-important_variables <-c("danceability" ,"energy" ,"loudness"  , "mode", "speechiness" ,"instrumentalness","valence",   "tempo",
-                        "track.popularity","track.name", "track.album.release_date" )
+variables.vector <-c("danceability" ,"energy" ,"loudness"  , "mode", "speechiness" ,"instrumentalness","valence",   "tempo",
+                        "track.popularity","track.name", "track.album.release_date",  "key_name", "mode_name", "key_mode", "track.explicit" )
 
 dataMundoSubset <- dataMundo %>%
-  select(important_variables)
+  select(variables.vector)
 
 #Formato de fecha
 ## Separamos por mes y por año, para tener mayor poder de análisis
-dataMundoSubset <- dataMundoSubset %>% mutate(track.album.release_date = as.Date(dataMundoSubset$track.album.release_date, '%Y-%m-%d'))%>% mutate(release.month =  format(dataMundoSubset$track.album.release_date, '%m'), release.year =  format(dataMundoSubset$track.album.release_date, '%Y'))
+dataMundoSubset <- dataMundoSubset %>% mutate(track.album.release_date = as.Date(dataMundoSubset$track.album.release_date, '%Y-%m-%d'))%>% mutate(release.month =  format(track.album.release_date, '%m'), release.year =  format(track.album.release_date, '%Y'))
 
-summary(dataMexicoSubset)
+summary(dataMundoSubset)
 
 
 #Obtener las caracterìsticas de las canciones top de 2020, 2019 y 2018 en México
@@ -100,42 +88,98 @@ Top2018M<- get_playlist_audio_features(playlist_uris ='37i9dQZF1DXe0di5KlqRqB')
 listaMex <- list(Top2020M, Top2019M, Top2018M)
 dataMexico <- do.call(rbind, listaMex)
 head(dataMexico)
-
 #Nuevamente, seleccionamos solo las columnas que nos importan
 
 dataMexicoSubset <- dataMexico %>%
-  select(important_variables)
+  select(variables.vector)
 
 #Agregamos la fecha en formato adecuado
-dataMexicoSubset <- dataMexicoSubset %>% mutate(track.album.release_date = as.Date(dataMexicoSubset$track.album.release_date, '%Y-%m-%d'))%>% mutate(release.month =  format(dataMexicoSubset$track.album.release_date, '%m'), release.year =  format(dataMexicoSubset$track.album.release_date, '%Y'))
+dataMexicoSubset <- dataMexicoSubset %>% mutate(track.album.release_date = as.Date(dataMexicoSubset$track.album.release_date, '%Y-%m-%d'))%>% mutate(release.month =  format(track.album.release_date, '%m'), release.year =  format(track.album.release_date, '%Y'))
 
 #Finalmente, vemos el summary para México
 summary(dataMexicoSubset)
 
+#Analisis exploratorio
+
+#Obtengamos el data numerico de cada dataframe
+dataMexicoNumerica <- dataMexicoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
+dataMundoNumerica <- dataMundoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
+
+
 #Correlaciones
 library(corrplot)
 ## Mexico
-dataMexicoNumerica <- dataMexicoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
 correlationsMexico <- cor(dataMexicoNumerica)
 corrplot.mixed(correlationsMexico, lower.col = "black", number.cex = .7)
 ## Mundo
-dataMundoNumerica <- dataMundoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
 correlationsMundo <- cor(dataMundoNumerica)
 corrplot.mixed(correlationsMundo, lower.col = "black", number.cex = .7)
 
 boxplot(dataMexicoNumerica)
 
-ggplot(dataMexicoNumerica, aes(x = `Mean Temperature [F]`, y = Month, fill = stat(x))) +
+###Preguntas
+library(ggthemes)
+
+#¿Podemos notar la depresion estacional en la valencia de las canciones lanzadas?
+ggplot(dataMexicoSubset, aes(x =valence , y = release.month, fill = stat(x))) +
   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
   scale_x_continuous(expand = c(0, 0)) +
-  scale_y_discrete(expand = expand_scale(mult = c(0.01, 0.25))) +
-  scale_fill_viridis_c(name = "Temp. [F]", option = "C") +
+  scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
+  scale_fill_viridis_c(name = "Valencia", option = "C") +
   labs(
-    title = 'Temperatures in Lincoln NE',
-    subtitle = 'Mean temperatures (Fahrenheit) by month for 2016'
+    title = 'Valencia atraves de los meses',
+    subtitle = '¿Podemos notar la depresión estacional?'
   ) +
   theme_ridges(font_size = 13, grid = TRUE) + 
   theme(axis.title.y = element_blank())
+## En el mundo
+ggplot(dataMexicoSubset, aes(x =valence , y = release.month, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
+  scale_fill_viridis_c(name = "Valencia", option = "C") +
+  labs(
+    title = 'Valencia atraves de los meses',
+    subtitle = '¿Podemos notar la depresión estacional?'
+  ) +
+  theme_ridges(font_size = 13, grid = TRUE) + 
+  theme(axis.title.y = element_blank())
+
+
+#¿Somos más felices? Cambio de la valencia a traves de los años
+
+ggplot(dataMundoSubset, aes(x =valence , y = release.year, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
+  scale_fill_viridis_c(name = "Valencia", option = "D") +
+  labs(
+    title = 'Valencia atraves de los años',
+    subtitle = '¿Somos más felices?'
+  ) +
+  theme_ridges(font_size = 13, grid = TRUE) + 
+  theme(axis.title.y = element_blank())
+
+##Relación de la danzabilidad y la popularidad a lo largo de los años
+ggplot(dataMundoSubset, aes(x= danceability, track.popularity)) +
+  geom_point(aes(color = track.explicit))+
+  labs(x ="Danzabilidad", y= "Popularidad",
+    title = 'Danzabilidad vs popularidad a lo largo de los años',
+    subtitle = '¿Que tan importante es que se baile para que pegue?'
+  ) + facet_wrap(~release.year) + 
+  scale_color_brewer(type = "qual", palette = "Set2") +
+  geom_smooth() +
+  theme_hc(style = 'darkunica') 
+
+ggplot(dataMundoSubset, aes(x= speechiness, track.popularity)) +
+  geom_point(aes(color = track.explicit))+
+  labs(x ="Speechiness", y= "Popularidad",
+       title = 'Speechiness vs popularidad a lo largo de los años',
+       subtitle = '¿Que tan importante son las palabras en una canción?'
+  ) + facet_wrap(~release.year) + 
+  scale_color_brewer(type = "qual", palette = "Set2") +
+  geom_smooth() +
+  theme_hc(style = 'darkunica') 
 
 #Pendientes
 #Checar NA's
