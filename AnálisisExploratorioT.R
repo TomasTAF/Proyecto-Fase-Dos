@@ -214,4 +214,17 @@ ggplot(mexico) +
     geom_histogram(stat='count') 
 
 # Nótese que efectivamente hay más canciones en mayor
+ggplot(mundial, aes(x =valence , y = key_name, fill = stat(x))) +
+    geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
+    scale_fill_viridis_c(name = "Valencia", option = "D") +
+    labs(
+        title = 'Titulo',
+        subtitle = 'Subtitulo'
+    ) +
+    theme_ridges(font_size = 13, grid = TRUE) + 
+    theme(axis.title.y = element_blank())
+
+ggplot(mundial, aes(x=valence, color =key_name ,fill=key_name)) + geom_histogram(aes(y=..density..),alpha = 0.5)
 
