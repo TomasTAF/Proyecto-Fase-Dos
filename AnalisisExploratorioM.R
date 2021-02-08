@@ -99,18 +99,26 @@ dataMexicoSubset <- dataMexicoSubset %>% mutate(track.album.release_date = as.Da
 #Finalmente, vemos el summary para México
 summary(dataMexicoSubset)
 
+#Checamos missing values #######NUEVO#########
+rowSums(is.na(dataMundoSubset))
+rowSums(is.na(dataMundoSubset))
+
+
+
+
 #Analisis exploratorio
 
 #Obtengamos el data numerico de cada dataframe
-dataMexicoNumerica <- dataMexicoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
-dataMundoNumerica <- dataMundoSubset %>% select(-c("track.name", "month.release", "year.release", "track.album.release_date"))
+dataMexicoNumerica <- dataMexicoSubset %>% select(-c("track.name", "release.month", "release.year", "track.album.release_date", "key_name", "mode_name", "key_mode", "track.explicit"))
+dataMundoNumerica <- dataMundoSubset %>% select(-c("track.name", "release.month", "release.year", "track.album.release_date","key_name", "mode_name", "key_mode", "track.explicit"))
 
 
 #Correlaciones
 library(corrplot)
 ## Mexico
+spotifypalette<-colorRampPalette(c("#191414","#1DB954"))
 correlationsMexico <- cor(dataMexicoNumerica)
-corrplot.mixed(correlationsMexico, lower.col = "black", number.cex = .7)
+corrplot.mixed(correlationsMundo, lower.col = "black", number.cex = .7)
 ## Mundo
 correlationsMundo <- cor(dataMundoNumerica)
 corrplot.mixed(correlationsMundo, lower.col = "black", number.cex = .7)
@@ -121,29 +129,30 @@ boxplot(dataMexicoNumerica)
 library(ggthemes)
 
 #¿Podemos notar la depresion estacional en la valencia de las canciones lanzadas?
-ggplot(dataMexicoSubset, aes(x =valence , y = release.month, fill = stat(x))) +
+ggplot(subset(dataMexicoSubset, (!is.na(release.month))), aes(x =valence , y = release.month, fill = stat(x))) +
   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
   scale_fill_viridis_c(name = "Valencia", option = "C") +
   labs(
-    title = 'Valencia atraves de los meses',
-    subtitle = '¿Podemos notar la depresión estacional?'
+    title = 'Valencia a través de los meses',
+    subtitle = '¿Podemos notar la depresión estacional en México?'
   ) +
   theme_ridges(font_size = 13, grid = TRUE) + 
   theme(axis.title.y = element_blank())
 ## En el mundo
-ggplot(dataMexicoSubset, aes(x =valence , y = release.month, fill = stat(x))) +
+ggplot(subset(dataMundoSubset, (!is.na(release.month))), aes(x =valence , y = release.month, fill = stat(x))) +
   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
   scale_fill_viridis_c(name = "Valencia", option = "C") +
   labs(
-    title = 'Valencia atraves de los meses',
-    subtitle = '¿Podemos notar la depresión estacional?'
+    title = 'Valencia a través de los meses',
+    subtitle = '¿Podemos notar la depresión estacional en el mundo?'
   ) +
   theme_ridges(font_size = 13, grid = TRUE) + 
   theme(axis.title.y = element_blank())
+
 
 
 #¿Somos más felices? Cambio de la valencia a traves de los años
@@ -154,18 +163,29 @@ ggplot(dataMundoSubset, aes(x =valence , y = release.year, fill = stat(x))) +
   scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
   scale_fill_viridis_c(name = "Valencia", option = "D") +
   labs(
-    title = 'Valencia atraves de los años',
-    subtitle = '¿Somos más felices?'
+    title = 'Valencia a través de los años',
+    subtitle = '¿Somos más felices en el mundo?'
   ) +
   theme_ridges(font_size = 13, grid = TRUE) + 
   theme(axis.title.y = element_blank())
 
+ggplot(subset(dataMexicoSubset, release.year %in% c("2020","2019","2018")), aes(x =valence , y = release.year, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = expansion(mult = c(0.01, 0.25))) +
+  scale_fill_viridis_c(name = "Valencia", option = "D") +
+  labs(
+    title = 'Valencia a través de los años',
+    subtitle = '¿Somos más felices en México?'
+  ) +
+  theme_ridges(font_size = 13, grid = TRUE) + 
+  theme(axis.title.y = element_blank())
 ##Relación de la danzabilidad y la popularidad a lo largo de los años
 ggplot(dataMundoSubset, aes(x= danceability, track.popularity)) +
   geom_point(aes(color = track.explicit))+
   labs(x ="Danzabilidad", y= "Popularidad",
-    title = 'Danzabilidad vs popularidad a lo largo de los años',
-    subtitle = '¿Que tan importante es que se baile para que pegue?'
+    title = '"Danzabilidad" vs popularidad a lo largo de los años',
+    subtitle = '¿Qué tan importante es que se baile para que pegue?'
   ) + facet_wrap(~release.year) + 
   scale_color_brewer(type = "qual", palette = "Set2") +
   geom_smooth() +
@@ -174,13 +194,40 @@ ggplot(dataMundoSubset, aes(x= danceability, track.popularity)) +
 ggplot(dataMundoSubset, aes(x= speechiness, track.popularity)) +
   geom_point(aes(color = track.explicit))+
   labs(x ="Speechiness", y= "Popularidad",
-       title = 'Speechiness vs popularidad a lo largo de los años',
-       subtitle = '¿Que tan importante son las palabras en una canción?'
+       title = '"Speechiness" vs popularidad a lo largo de los años',
+       subtitle = '¿Qué tan importante son las palabras en una canción?'
   ) + facet_wrap(~release.year) + 
   scale_color_brewer(type = "qual", palette = "Set2") +
   geom_smooth() +
   theme_hc(style = 'darkunica') 
 
+ggplot(subset(dataMexicoSubset, release.year %in% c("2020","2019","2018")), aes(x= danceability, track.popularity)) +
+  geom_point(aes(color = track.explicit))+
+  labs(x ="Danzabilidad", y= "Popularidad",
+       title = '"Danzabilidad" vs popularidad a lo largo de los años en México',
+       subtitle = '¿Qué tan importante es que se baile para que pegue para los mexicanos?'
+  ) + facet_wrap(~release.year) + 
+  scale_color_brewer(type = "qual", palette = "Set2") +
+  geom_smooth() +
+  theme_hc(style = 'darkunica') 
+
+ggplot(subset(dataMexicoSubset, release.year %in% c("2020","2019","2018")), aes(x= speechiness, track.popularity)) +
+  geom_point(aes(color = track.explicit))+
+  labs(x ="Speechiness", y= "Popularidad",
+       title = '"Speechiness" vs popularidad a lo largo de los años  en México',
+       subtitle = '¿Qué tan importante son las palabras en una canción para los mexicanos?'
+  ) + facet_wrap(~release.year) + 
+  scale_color_brewer(type = "qual", palette = "Set2") +
+  geom_smooth() +
+  theme_hc(style = 'darkunica')
+
+ggplot(dataMundoSubset, aes(x=track.explicit, fill=track.explicit)) + geom_bar() +
+scale_color_brewer(type = "qual", palette = "Set2")  +
+  theme_hc(style = 'darkunica')  +
+  labs(x ="Lenguaje explícito", y= "Conteo",
+       title = '¿Lenguaje explícito?',
+       subtitle = 'Número de canciones con lenguaje explícito vs sin lenguaje explícito'
+  )
 #Pendientes
 #Checar NA's
 
