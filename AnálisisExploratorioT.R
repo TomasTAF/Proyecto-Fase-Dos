@@ -60,45 +60,99 @@ names(mundial)
 # 2020
 mexico[1:50,] %>%
     ggplot() + 
-    aes(valence) +
-    geom_histogram(binwidth = 0.09, col="black", fill = "blue") + 
+    aes(valence,
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.06,
+                   show.legend = FALSE) + 
     ggtitle("Histograma de valencia 2020") +
     ylab("Frecuencia") +
-    xlab("Valencia") + 
-    theme_light()
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
     
-    
-# 2018 y 2019    
-mexico[51:nrow(mexico),] %>%
+# 2019
+mexico[51:150,] %>%
     ggplot() + 
-    aes(valence) +
-    geom_histogram(binwidth = 0.09, col="black", fill = "blue") + 
-    ggtitle("Histograma de valencia 2020") +
+    aes(valence, 
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.08,
+                   show.legend = FALSE) + 
+    ggtitle("Histograma de valencia 2019") +
     ylab("Frecuencia") +
-    xlab("Valencia") + 
-    theme_light()
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
+# 2018
+mexico[151:200,] %>%
+    ggplot() + 
+    aes(valence, 
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.08,
+                   show.legend = FALSE) + 
+    ggtitle("Histograma de valencia 2018") +
+    ylab("Frecuencia") +
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
 
 # Valencia en el mundo pandémico ####
 # 2020
 mundial[1:50,] %>%
     ggplot() + 
-    aes(valence) +
-    geom_histogram(binwidth = 0.09, col="black", fill = "blue") + 
+    aes(valence,
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.1,
+                   show.legend = FALSE) + 
     ggtitle("Histograma de valencia 2020") +
     ylab("Frecuencia") +
-    xlab("Valencia") + 
-    theme_light()
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
     
     
 # 2019   
-mexico[51:150,] %>%
+mundial[51:150,] %>%
     ggplot() + 
-    aes(valence) +
-    geom_histogram(binwidth = 0.09, col="black", fill = "blue") + 
-    ggtitle("Histograma de valencia 2020") +
+    aes(valence,
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.09,
+                   show.legend = FALSE) + 
+    ggtitle("Histograma de valencia 2019") +
     ylab("Frecuencia") +
-    xlab("Valencia") + 
-    theme_light()
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
+
+
+# 2018   
+mundial[151:250,] %>%
+    ggplot() + 
+    aes(valence,
+        fill = cut(valence, 100)) +
+    geom_histogram(binwidth = 0.09,
+                   show.legend = FALSE) + 
+    ggtitle("Histograma de valencia 2018") +
+    ylab("Frecuencia") +
+    xlab("Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
 
 # Popularidad mundial con respecto a otras variables ####
     
@@ -170,39 +224,75 @@ corrplot(mundial.cor)
 # Volumen contra energía
 ggplot(mundial,
        aes(x = loudness,
-           y = energy,
-           col = mode_name)) + 
-    geom_point() + 
-    labs(x = 'Energía', y = 'Volumen')
+           y = energy)) + 
+    geom_point(col = "#58D3F7") +
+    theme_gray()+
+    ggtitle('Volumen contra enegía')+
+    labs(x = 'Energía',
+         y = 'Volumen')+
+    theme_dark()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))    
 
 # Danzabilidad contra energía
-ggplot(mundial,
+ggplot(mundial)+
        aes(x = energy,
-           y = danceability,
-           col = mode_name)) + 
-    geom_point() + 
-    labs(x = 'Energía', y = 'Danzabilidad')
+           y = danceability)+
+    geom_point(col = "#F7BE81") +
+    theme_gray()+
+    ggtitle('Bailabilidad contra energía')+
+    labs(x = 'Energía',
+         y = 'Bailabilidad')+
+    theme_dark()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
+
+# Valencia contra danzabilidad
+ggplot(mundial,
+       aes(x = danceability, 
+           y = valence)) +
+    geom_point(col = "#F7BE81") +
+    theme_gray()+
+    ggtitle('Valencia contra bailabilidad')+
+    labs(x = 'Bailabilidad',
+         y = 'Valencia')+
+    theme_dark()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
 
 # Habla contra instrumental
 ggplot(mundial,
        aes(x = speechiness, 
-           y = instrumentalness,
-           col = mode_name)) + 
-    geom_point() + 
-    labs(x = 'Habla', y = 'Instrumental')
-
-# Valencia contra danzabilidad
-ggplot(mundial,
-       aes(x = energy, 
-           y = valence,
-           col = mode_name)) + 
-    geom_point() + 
-    labs(x = 'Habla', y = 'Instrumental')
+           y = instrumentalness)) + 
+    geom_point(col = "#58FA58") +
+    theme_gray()+
+    ggtitle('Habla contra instrumental')+
+    labs(x = 'Habla',
+         y = 'Instrumental')+
+    theme_dark()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
 
 # Valencia y modo ####
 
-ggplot(mexico, aes(x=mode_name, y=valence)) + 
-    geom_bar(stat = 'identity')
+ggplot(mexico) + 
+    aes(x=mode_name,
+        y=valence, 
+        fill = cut(valence, 100)) +
+    geom_bar(stat = 'identity',
+             show.legend = FALSE)+
+    ggtitle("Valencia según el modo") +
+    labs(x = "Modo",y = "Valencia")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
 
 # Nótese que lo anterior se puede deber a...
 # - mayor número de canciones en mayor
@@ -210,8 +300,18 @@ ggplot(mexico, aes(x=mode_name, y=valence)) +
 
 # Histograma del nombre del modo
 ggplot(mexico) + 
-    aes(mode_name) +
-    geom_histogram(stat='count') 
+    aes(mode_name,
+        fill = cut(valence, 100)) +
+    geom_histogram(stat='count',
+                   show.legend = FALSE) + 
+    ggtitle("Histograma de los modos") +
+    ylab("Frecuencia") +
+    xlab("Modo")+
+    theme_gray()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+
 
 # Nótese que efectivamente hay más canciones en mayor
 ggplot(mundial, aes(x =valence , y = key_name, fill = stat(x))) +
